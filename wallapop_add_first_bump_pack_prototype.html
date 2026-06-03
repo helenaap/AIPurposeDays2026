@@ -1,0 +1,545 @@
+
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg-base: #FFFFFF;
+    --bg-low: #F0F3F5;
+    --bg-mid: #D1DBE0;
+    --bg-high: #29363D;
+    --content-high: #29363D;
+    --content-mid: #5C7A89;
+    --content-low: #A3B8C1;
+    --content-onhigh: #FFFFFF;
+    --brand-mid: #038673;
+    --brand-low: #3DD2BA;
+    --blue-high: #0B2DB0;
+    --magenta-mid: #D32069;
+    --blue-banner: #7FC7FD;
+  }
+  .phone-frame {
+    width: 375px;
+    height: 720px;
+    background: var(--bg-base);
+    border-radius: 40px;
+    overflow: hidden;
+    position: relative;
+    border: 2px solid #E0E0E0;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.10);
+    margin: 0 auto;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  }
+  .screen {
+    width: 375px;
+    height: 720px;
+    position: absolute;
+    top: 0; left: 0;
+    background: var(--bg-base);
+    display: none;
+    flex-direction: column;
+    overflow: hidden;
+  }
+  .screen.active { display: flex; }
+
+  .status-bar {
+    height: 50px;
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    padding: 0 20px 12px 28px;
+    flex-shrink: 0;
+    background: var(--bg-base);
+  }
+  .status-time { font-size: 13px; font-weight: 600; color: var(--content-high); }
+  .status-icons { display: flex; gap: 5px; align-items: center; }
+
+  .nav-bar {
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 4px;
+    flex-shrink: 0;
+    background: var(--bg-base);
+  }
+  .nav-btn {
+    width: 48px; height: 48px;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; border-radius: 100px;
+    border: none; background: transparent;
+  }
+  .nav-btn:active { background: var(--bg-low); }
+  .nav-title {
+    flex: 1; text-align: center;
+    font-size: 16px; font-weight: 700; color: var(--content-high);
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    padding: 0 8px;
+  }
+  .nav-action { font-size: 14px; font-weight: 700; color: var(--brand-mid); padding: 6px 12px; cursor: pointer; }
+  .back-icon { color: var(--content-high); font-size: 20px; }
+
+  .btn-primary {
+    background: var(--bg-high); color: var(--content-onhigh);
+    border: none; border-radius: 100px; padding: 12px 24px;
+    font-size: 16px; font-weight: 700; cursor: pointer;
+    width: 100%; text-align: center; display: block;
+  }
+  .btn-outline {
+    background: transparent; color: var(--content-high);
+    border: 2px solid var(--content-high); border-radius: 100px;
+    padding: 12px 24px; font-size: 16px; font-weight: 700;
+    cursor: pointer; width: 100%; text-align: center; display: block;
+  }
+  .btn-green {
+    background: var(--brand-low); color: var(--content-high);
+    border: none; border-radius: 100px; padding: 12px 24px;
+    font-size: 16px; font-weight: 700; cursor: pointer;
+    text-align: center; width: 100%; display: block;
+  }
+  .btn-outline-green {
+    background: transparent; color: var(--content-high);
+    border: 2px solid var(--brand-low); border-radius: 100px;
+    padding: 8px 24px; font-size: 16px; font-weight: 700;
+    cursor: pointer; text-align: center; display: inline-block;
+  }
+
+  .card {
+    background: var(--bg-base);
+    border: 1px solid var(--content-low);
+    border-radius: 16px;
+    overflow: hidden;
+  }
+  .divider { height: 1px; background: var(--bg-mid); width: 100%; }
+
+  .radio-btn {
+    width: 24px; height: 24px; border-radius: 100px;
+    border: 2px solid var(--content-mid); background: var(--bg-low);
+    flex-shrink: 0; display: flex; align-items: center; justify-content: center;
+  }
+  .radio-btn.selected { background: var(--bg-high); border-color: var(--bg-high); }
+  .radio-btn.selected::after { content: ''; width: 12px; height: 12px; border-radius: 100px; background: var(--content-onhigh); }
+
+  .reach-card {
+    flex: 1; border: 1px solid var(--content-low); border-radius: 16px;
+    padding: 8px 12px; background: var(--bg-base); cursor: pointer; position: relative;
+  }
+  .reach-card.selected { border: 2px solid var(--content-high); }
+
+  .pack-card {
+    border: 1px solid var(--content-low); border-radius: 16px;
+    background: var(--bg-base); cursor: pointer; overflow: hidden; position: relative;
+  }
+  .pack-card.selected { border: 2px solid var(--content-high); }
+  .pack-card-inner { padding: 4px 12px 0; }
+  .pack-card-main { display: flex; align-items: flex-start; padding: 10px 0; position: relative; }
+  .pack-card-texts { flex: 1; padding-right: 28px; }
+  .pack-card-name { font-size: 15px; font-weight: 700; color: var(--content-high); }
+  .pack-card-detail { font-size: 13px; color: var(--content-mid); margin-top: 2px; }
+  .pack-card-pricing { padding: 0 12px 8px; text-align: right; }
+  .pack-price { font-size: 18px; font-weight: 700; color: var(--content-high); }
+  .pack-best { font-size: 11px; font-weight: 700; color: var(--magenta-mid); margin-bottom: 2px; }
+
+  .bottom-bar {
+    padding: 12px 16px;
+    box-shadow: 0 -3px 8px rgba(37,50,56,0.08), 0 -8px 16px rgba(37,50,56,0.04);
+    flex-shrink: 0; background: var(--bg-base);
+  }
+
+  .bottom-tabs {
+    background: var(--bg-base); border-top: 1px solid var(--bg-mid);
+    display: flex; height: 49px; flex-shrink: 0;
+  }
+  .tab-item {
+    flex: 1; display: flex; flex-direction: column; align-items: center;
+    justify-content: center; gap: 2px; padding-top: 4px;
+    font-size: 11px; color: var(--content-mid); cursor: pointer;
+  }
+  .tab-item.active { color: var(--content-high); font-weight: 700; }
+  .tab-item i { font-size: 20px; }
+
+  .home-indicator {
+    height: 34px; display: flex; align-items: center; justify-content: center;
+    background: var(--bg-base); padding-bottom: 8px; flex-shrink: 0;
+  }
+  .home-indicator-bar { width: 134px; height: 5px; background: var(--content-high); border-radius: 100px; }
+
+  .bumps-banner {
+    background: var(--blue-banner); border-radius: 16px;
+    padding: 12px 16px; display: flex; gap: 12px; align-items: center; cursor: pointer;
+  }
+  .banner-content { flex: 1; }
+  .banner-badge {
+    background: var(--magenta-mid); color: white;
+    font-size: 11px; font-weight: 700; padding: 2px 8px;
+    border-radius: 16px; display: inline-block; margin-bottom: 4px;
+  }
+  .banner-title { font-size: 15px; font-weight: 700; color: var(--blue-high); }
+  .banner-text { font-size: 13px; color: var(--blue-high); margin-top: 2px; }
+  .banner-btn {
+    background: white; color: var(--blue-high); font-size: 13px; font-weight: 700;
+    padding: 6px 14px; border-radius: 100px; white-space: nowrap; cursor: pointer; border: none;
+  }
+
+  .thin-tabs { background: var(--bg-low); border-radius: 99999px; display: inline-flex; }
+  .thin-tab {
+    height: 32px; padding: 0 16px; display: flex; align-items: center;
+    font-size: 14px; font-weight: 700; color: var(--content-high);
+    border-radius: 100px; cursor: pointer; white-space: nowrap;
+  }
+  .thin-tab.active { background: var(--bg-high); color: var(--content-onhigh); }
+
+  .info-box { background: var(--bg-low); border-radius: 16px; padding: 14px; }
+  .info-box-title { font-size: 13px; font-weight: 700; color: var(--content-high); margin-bottom: 8px; }
+  .info-box ul { padding-left: 16px; }
+  .info-box li { font-size: 13px; color: var(--content-high); line-height: 18px; margin-bottom: 4px; }
+
+  .success-illustration {
+    width: 160px; height: 160px; margin: 0 auto;
+    background: #E8F8F5; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center; font-size: 64px;
+  }
+  .visa-logo {
+    width: 44px; height: 44px; background: #1A1F71; border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    color: white; font-size: 11px; font-weight: 900; letter-spacing: -0.5px; flex-shrink: 0;
+  }
+
+  .progress-dots { display: flex; gap: 6px; justify-content: center; padding: 8px 0 4px; }
+  .dot { width: 6px; height: 6px; border-radius: 3px; background: var(--bg-mid); transition: all 0.2s; }
+  .dot.active { background: var(--bg-high); width: 18px; }
+
+  @keyframes slideIn { from { transform: translateX(30px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+  .screen.active { animation: slideIn 0.18s ease-out; }
+
+  /* Screen 2 & 3 scrollable content area */
+  .scroll-content { flex: 1; overflow-y: auto; scrollbar-width: none; }
+  .scroll-content::-webkit-scrollbar { display: none; }
+</style>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.11.0/dist/tabler-icons.min.css">
+
+<div style="padding: 1rem 0; display: flex; flex-direction: column; align-items: center; gap: 12px;">
+
+  <div class="progress-dots">
+    <div class="dot active" id="dot0"></div>
+    <div class="dot" id="dot1"></div>
+    <div class="dot" id="dot2"></div>
+    <div class="dot" id="dot3"></div>
+  </div>
+
+  <div class="phone-frame">
+
+    <!-- Screen 1: Manage Subscription — NO scroll, fixed layout -->
+    <div class="screen active" id="screen-manage">
+      <div class="status-bar">
+        <span class="status-time">9:41</span>
+        <div class="status-icons"><i class="ti ti-wifi" style="font-size:14px;color:var(--content-high)"></i><i class="ti ti-battery-2" style="font-size:14px;color:var(--content-high)"></i></div>
+      </div>
+      <div class="nav-bar">
+        <button class="nav-btn" aria-label="Back"><i class="ti ti-arrow-left back-icon"></i></button>
+        <span class="nav-title">Wallapop PRO</span>
+        <span class="nav-action">Help</span>
+      </div>
+
+      <!-- Fixed content, no overflow -->
+      <div style="flex: 1; display: flex; flex-direction: column; padding: 0 16px; overflow: hidden;">
+        <div style="padding: 8px 0 12px; flex-shrink: 0;">
+          <div class="thin-tabs">
+            <div class="thin-tab active">Subscriptions</div>
+            <div class="thin-tab">Invoices</div>
+          </div>
+        </div>
+
+        <div class="card" style="padding-top: 16px; position: relative; flex-shrink: 0;">
+          <div style="position: absolute; right: 15px; top: 15px; cursor: pointer;">
+            <i class="ti ti-dots-vertical" style="color: var(--content-mid); font-size: 20px;"></i>
+          </div>
+          <div style="padding: 0 16px 16px; display: flex; flex-direction: column; gap: 12px;">
+            <div>
+              <div style="font-size: 24px; font-weight: 700; color: var(--content-high);">Cars</div>
+              <div style="font-size: 16px; font-weight: 700; color: var(--content-high);">Plan 20 articles</div>
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 4px;">
+              <div style="font-size: 20px; color: var(--content-high);">49,00 €/mes</div>
+              <div style="font-size: 14px; color: var(--content-mid);">Next payment: 20/03/2026</div>
+            </div>
+            <div class="bumps-banner">
+              <div class="banner-content">
+                <span class="banner-badge">PRO exclusive</span>
+                <div class="banner-title">Bumps packs</div>
+                <div class="banner-text">Give more visibility to your listings every month</div>
+              </div>
+              <button class="banner-btn" onclick="goToSelectPack()">See more</button>
+            </div>
+          </div>
+          <div class="divider"></div>
+          <div style="padding: 0 16px; height: 56px; display: flex; align-items: center; justify-content: space-between; cursor: pointer;">
+            <span style="font-size: 16px; color: var(--content-high);">See all benefits included</span>
+            <i class="ti ti-chevron-right" style="color: var(--content-high); font-size: 20px;"></i>
+          </div>
+        </div>
+
+        <div style="display: flex; justify-content: center; padding: 20px 0; flex-shrink: 0;">
+          <button class="btn-outline-green">Add new subscription</button>
+        </div>
+
+        <div style="flex: 1;"></div>
+      </div>
+
+      <div class="bottom-tabs">
+        <div class="tab-item"><i class="ti ti-home" aria-hidden="true"></i><span>Inicio</span></div>
+        <div class="tab-item"><i class="ti ti-heart" aria-hidden="true"></i><span>Favoritos</span></div>
+        <div class="tab-item"><i class="ti ti-circle-plus" aria-hidden="true"></i><span>Súbelo</span></div>
+        <div class="tab-item"><i class="ti ti-message" aria-hidden="true"></i><span>Buzón</span></div>
+        <div class="tab-item active"><i class="ti ti-user" aria-hidden="true"></i><span>Tú</span></div>
+      </div>
+      <div class="home-indicator"><div class="home-indicator-bar"></div></div>
+    </div>
+
+    <!-- Screen 2: Select Pack — scrollable -->
+    <div class="screen" id="screen-select">
+      <div class="status-bar">
+        <span class="status-time">9:41</span>
+        <div class="status-icons"><i class="ti ti-wifi" style="font-size:14px;color:var(--content-high)"></i><i class="ti ti-battery-2" style="font-size:14px;color:var(--content-high)"></i></div>
+      </div>
+      <div class="nav-bar">
+        <button class="nav-btn" onclick="goBack()" aria-label="Back"><i class="ti ti-arrow-left back-icon"></i></button>
+        <div style="flex:1;min-width:48px;"></div>
+      </div>
+
+      <div class="scroll-content" style="padding: 0 16px 100px;">
+        <div style="padding: 8px 0 12px;">
+          <h1 style="font-size: 22px; font-weight: 700; color: var(--content-high); line-height: 30px;">Choose a Bumps pack to add to your subscription</h1>
+        </div>
+        <div style="margin-bottom: 14px;">
+          <div style="font-size: 15px; font-weight: 700; color: var(--content-high); margin-bottom: 8px;">Select reach</div>
+          <div style="display: flex; gap: 8px;">
+            <div class="reach-card selected" id="reach-city" onclick="selectReach('city')">
+              <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                <div>
+                  <div style="font-size: 15px; font-weight: 700; color: var(--content-high);">City</div>
+                  <div style="font-size: 13px; color: var(--content-mid); margin-top: 4px; line-height: 18px;">200% more views on average</div>
+                </div>
+                <div class="radio-btn selected" id="radio-city"></div>
+              </div>
+            </div>
+            <div class="reach-card" id="reach-country" onclick="selectReach('country')">
+              <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                <div>
+                  <div style="font-size: 15px; font-weight: 700; color: var(--content-high);">Country</div>
+                  <div style="font-size: 13px; color: var(--content-mid); margin-top: 4px; line-height: 18px;">500% more views on average</div>
+                </div>
+                <div class="radio-btn" id="radio-country"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div>
+          <div style="font-size: 15px; font-weight: 700; color: var(--content-high); margin-bottom: 8px;">Select your pack</div>
+          <div style="display: flex; flex-direction: column; gap: 6px;" id="pack-list"></div>
+          <div style="margin-top: 10px; font-size: 13px; color: var(--content-mid); line-height: 18px;">The pack will be added to your PRO subscription and renew monthly.</div>
+        </div>
+      </div>
+
+      <div class="bottom-bar">
+        <button class="btn-primary" onclick="goToSummary()">Continue</button>
+      </div>
+    </div>
+
+    <!-- Screen 3: Summary — scrollable -->
+    <div class="screen" id="screen-summary">
+      <div class="status-bar">
+        <span class="status-time">9:41</span>
+        <div class="status-icons"><i class="ti ti-wifi" style="font-size:14px;color:var(--content-high)"></i><i class="ti ti-battery-2" style="font-size:14px;color:var(--content-high)"></i></div>
+      </div>
+      <div class="nav-bar">
+        <button class="nav-btn" onclick="goBack()" aria-label="Back"><i class="ti ti-arrow-left back-icon"></i></button>
+        <div style="flex:1;"></div>
+        <div style="min-width:48px;"></div>
+      </div>
+
+      <div class="scroll-content" style="padding: 0 16px 100px;">
+        <div style="padding: 8px 0 14px;">
+          <h1 style="font-size: 22px; font-weight: 700; color: var(--content-high); line-height: 30px;">Confirm subscription update</h1>
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 10px;">
+          <div class="card" style="padding: 14px 0;">
+            <div style="padding: 0 16px;">
+              <div style="display: flex; justify-content: space-between; align-items: center; padding-bottom: 10px;">
+                <span style="font-size: 15px; color: var(--content-high);" id="summary-pack-name">100 City Bumps</span>
+                <span style="font-size: 15px; font-weight: 700; color: var(--content-high);" id="summary-pack-price">9,00 €/month</span>
+              </div>
+            </div>
+            <div class="divider"></div>
+            <div style="padding: 0 16px;">
+              <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px 0 8px;">
+                <span style="font-size: 15px; font-weight: 700; color: var(--content-high);">To pay today</span>
+                <span style="font-size: 22px; font-weight: 700; color: var(--content-high);" id="summary-today">5,50 €</span>
+              </div>
+              <p style="font-size: 13px; color: var(--content-mid); line-height: 18px; padding-bottom: 6px;">You'll get <strong id="summary-bumps-note">100 bumps</strong> now for a price adjusted to the days left in your cycle.</p>
+            </div>
+          </div>
+          <div class="info-box">
+            <div class="info-box-title">What happens next?</div>
+            <ul>
+              <li>Your Wallapop PRO Cars plan updates to <strong id="summary-new-price">58,00 €/month</strong> starting today.</li>
+              <li style="margin-top: 4px;">Your <strong id="summary-bumps-text">100 City Bumps</strong> will be renewed every month, but won't accumulate.</li>
+              <li style="margin-top: 4px;">You can modify or cancel at any time.</li>
+            </ul>
+          </div>
+          <div>
+            <div style="font-size: 13px; font-weight: 700; color: var(--content-high); margin-bottom: 8px;">Subscription payment method</div>
+            <div style="display: flex; gap: 12px; align-items: center;">
+              <div class="visa-logo">VISA</div>
+              <span style="font-size: 15px; color: var(--content-high);">Visa *** 1234</span>
+              <span style="font-size: 13px; font-weight: 700; color: var(--content-high); text-decoration: underline; margin-left: auto; cursor: pointer;">Change</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="bottom-bar">
+        <button class="btn-green" onclick="goToSuccess()">Confirm</button>
+      </div>
+    </div>
+
+    <!-- Screen 4: Success — fixed layout -->
+    <div class="screen" id="screen-success">
+      <div class="status-bar">
+        <span class="status-time">9:41</span>
+        <div class="status-icons"><i class="ti ti-wifi" style="font-size:14px;color:var(--content-high)"></i><i class="ti ti-battery-2" style="font-size:14px;color:var(--content-high)"></i></div>
+      </div>
+      <div class="nav-bar">
+        <button class="nav-btn" onclick="goToManage()" aria-label="Close"><i class="ti ti-x" style="font-size:20px;color:var(--content-high)"></i></button>
+        <div style="flex:1;min-width:48px;"></div>
+      </div>
+      <div style="flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 24px; padding: 0 16px;">
+        <div class="success-illustration" aria-hidden="true">🚀</div>
+        <div style="text-align: center; display: flex; flex-direction: column; gap: 10px;">
+          <h2 style="font-size: 22px; font-weight: 700; color: #253238; line-height: 30px; max-width: 320px;">The Bumps pack has been added to your plan</h2>
+          <p style="font-size: 15px; color: #607D8B; line-height: 22px;">You can already start bumping your listings</p>
+        </div>
+      </div>
+      <div style="padding: 0 16px; display: flex; flex-direction: column; gap: 10px;">
+        <button class="btn-outline" onclick="goToManage()">See subscription</button>
+        <button class="btn-primary" onclick="goToManage()">Go to catalog</button>
+      </div>
+      <div class="home-indicator"><div class="home-indicator-bar"></div></div>
+    </div>
+
+  </div>
+
+  <div style="font-size: 12px; color: var(--color-text-secondary, #888); text-align: center;">
+    Tap <strong>See more</strong> on the banner to start the flow
+  </div>
+</div>
+
+<script>
+const packs = {
+  city: [
+    { name: "100 City Bumps", detail: "1 day per listing", price: "9,00 €/month", today: "5,50 €", bumps: "100", newPlan: "58,00 €/month", best: false },
+    { name: "250 City Bumps", detail: "1 day per listing", price: "19,00 €/month", today: "11,00 €", bumps: "250", newPlan: "68,00 €/month", best: false },
+    { name: "500 City Bumps", detail: "1 day per listing", price: "29,00 €/month", today: "18,00 €", bumps: "500", newPlan: "78,00 €/month", best: false },
+    { name: "700 City Bumps", detail: "1 day per listing", price: "39,00 €/month", today: "22,00 €", bumps: "700", newPlan: "88,00 €/month", best: true }
+  ],
+  country: [
+    { name: "100 Country Bumps", detail: "1 day per listing", price: "12,00 €/month", today: "7,00 €", bumps: "100", newPlan: "61,00 €/month", best: false },
+    { name: "250 Country Bumps", detail: "1 day per listing", price: "22,00 €/month", today: "13,00 €", bumps: "250", newPlan: "71,00 €/month", best: false },
+    { name: "500 Country Bumps", detail: "1 day per listing", price: "32,00 €/month", today: "19,00 €", bumps: "500", newPlan: "81,00 €/month", best: false },
+    { name: "700 Country Bumps", detail: "1 day per listing", price: "44,00 €/month", today: "26,00 €", bumps: "700", newPlan: "93,00 €/month", best: true }
+  ]
+};
+
+let currentReach = 'city';
+let selectedPackIdx = 0;
+let screenHistory = [];
+
+function updateDots(screenId) {
+  const ids = ['screen-manage','screen-select','screen-summary','screen-success'];
+  const idx = ids.indexOf(screenId);
+  for (let i = 0; i < 4; i++) {
+    document.getElementById('dot' + i).className = i === idx ? 'dot active' : 'dot';
+  }
+}
+
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  updateDots(id);
+}
+
+function goToSelectPack() {
+  screenHistory.push('screen-manage');
+  renderPacks();
+  showScreen('screen-select');
+}
+
+function goToSummary() {
+  screenHistory.push('screen-select');
+  const pack = packs[currentReach][selectedPackIdx];
+  document.getElementById('summary-pack-name').textContent = pack.name;
+  document.getElementById('summary-pack-price').textContent = pack.price;
+  document.getElementById('summary-today').textContent = pack.today;
+  document.getElementById('summary-bumps-note').textContent = pack.bumps + ' bumps';
+  document.getElementById('summary-new-price').textContent = pack.newPlan;
+  document.getElementById('summary-bumps-text').textContent = pack.bumps + ' ' + (currentReach === 'city' ? 'City' : 'Country') + ' Bumps';
+  showScreen('screen-summary');
+}
+
+function goToSuccess() {
+  screenHistory.push('screen-summary');
+  showScreen('screen-success');
+}
+
+function goToManage() {
+  screenHistory = [];
+  showScreen('screen-manage');
+}
+
+function goBack() {
+  if (screenHistory.length > 0) {
+    const prev = screenHistory.pop();
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    document.getElementById(prev).classList.add('active');
+    updateDots(prev);
+  }
+}
+
+function selectReach(reach) {
+  currentReach = reach;
+  selectedPackIdx = 0;
+  document.getElementById('reach-city').className = 'reach-card' + (reach === 'city' ? ' selected' : '');
+  document.getElementById('reach-country').className = 'reach-card' + (reach === 'country' ? ' selected' : '');
+  document.getElementById('radio-city').className = 'radio-btn' + (reach === 'city' ? ' selected' : '');
+  document.getElementById('radio-country').className = 'radio-btn' + (reach === 'country' ? ' selected' : '');
+  renderPacks();
+}
+
+function selectPack(idx) {
+  selectedPackIdx = idx;
+  renderPacks();
+}
+
+function renderPacks() {
+  const list = document.getElementById('pack-list');
+  list.innerHTML = packs[currentReach].map((p, i) => `
+    <div class="pack-card ${i === selectedPackIdx ? 'selected' : ''}" onclick="selectPack(${i})">
+      <div class="pack-card-inner">
+        <div class="pack-card-main">
+          <div class="pack-card-texts">
+            <div class="pack-card-name">${p.name}</div>
+            <div class="pack-card-detail">${p.detail}</div>
+          </div>
+          <div class="radio-btn ${i === selectedPackIdx ? 'selected' : ''}" style="position:absolute;right:12px;top:10px;"></div>
+        </div>
+        <div class="divider"></div>
+      </div>
+      <div class="pack-card-pricing">
+        ${p.best ? `<div class="pack-best">BEST VALUE</div>` : ''}
+        <div class="pack-price">${p.price}</div>
+      </div>
+    </div>
+  `).join('');
+}
+
+renderPacks();
+</script>
